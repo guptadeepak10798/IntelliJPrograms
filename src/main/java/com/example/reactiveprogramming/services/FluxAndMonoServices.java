@@ -128,6 +128,20 @@ public class FluxAndMonoServices {
                 (s, s2) -> s+s2).log();
     }
 
+    public Flux<String> fluxZipWith(){
+        Flux<String> fuitsFlux = Flux.just("Apple", "Pine Apple");
+        Flux<String> veggiesFlux = Flux.just("Lemon", "cucumber");
+        return fuitsFlux.zipWith(veggiesFlux, (s, s2) -> s + s2).log();
+    }
+
+    public Flux<String> fluxZipTuple(){
+        Flux<String> fuitsFlux = Flux.just("Apple", "Pine Apple");
+        Flux<String> veggiesFlux = Flux.just("Lemon", "cucumber");
+        Flux<String> moreVeggiesFlux = Flux.just("Potato", "Tomato");
+        return Flux.zip(fuitsFlux,veggiesFlux,moreVeggiesFlux)
+                .map(objects -> objects.getT1()+objects.getT2()+objects.getT3())
+                .log();
+    }
 
     public Mono<String> firstMono(){
         return Mono.just("Mango").log();
@@ -152,7 +166,82 @@ public class FluxAndMonoServices {
                 .log();
     }
 
+    public Mono<String> monoZipWith(){
+        Mono<String> fuitsFlux = Mono.just("Apple");
+        Mono<String> veggiesFlux = Mono.just("Lemon");
+        return fuitsFlux.zipWith(veggiesFlux, (s, s2) -> s + s2).log();
+    }
 
+    public Flux<String> firstFluxFilterDoOn(int number){
+
+        return Flux.fromIterable(List.of("Apple","Banana"))
+                .filter(s -> s.length()>number)
+                .doOnNext(s -> System.out.println("s -> "+s))
+                .doOnSubscribe(subscription -> System.out.println("subscription.toString() ->"+subscription.toString()))
+                .doOnComplete(() -> System.out.println("Completed !! "))
+                .log();
+    }
+
+    public Flux<String> fruitsFluxOnErrorReturn(){
+        return Flux.just("Apple","Mango")
+                .concatWith(Flux.error(() -> new RuntimeException("Exception Occured !!")))
+                .onErrorReturn("Orange")
+                .log();
+    }
+
+
+    public Flux<String> fruitsFluxOnErrorContinue(){
+        return Flux.just("Apple","Mango","Orange")
+                .map(s -> {
+                    if (s.equalsIgnoreCase("Mango")) {
+                        throw new RuntimeException("Exception generated") ;
+
+                    }else{
+                        return s.toUpperCase();
+                    }
+                })
+                .onErrorContinue((throwable, o) ->  {
+                    System.out.println("Error due to => "+throwable);
+                    System.out.println("Object => "+o);
+                })
+                .log();
+    }
+
+    public Flux<String> fruitsFluxOnErrorMap(){
+        return Flux.just("Apple","Mango","Orange")
+                .map(s -> {
+                    if (s.equalsIgnoreCase("Mango")) {
+                        throw new RuntimeException("Exception generated") ;
+
+                    }else{
+                        return s.toUpperCase();
+                    }
+                })
+                .onErrorMap((throwable) ->  {
+                    System.out.println("Error due to => "+throwable);
+
+                    return new IllegalStateException("From onError Map");
+                })
+                .log();
+    }
+
+    public Flux<String> fruitsFluxDoOnError(){
+        return Flux.just("Apple","Mango","Orange")
+                .map(s -> {
+                    if (s.equalsIgnoreCase("Mango")) {
+                        throw new RuntimeException("Exception generated") ;
+
+                    }else{
+                        return s.toUpperCase();
+                    }
+                })
+                .doOnError(
+                        (throwable) ->  {
+                            System.out.println("Error due to => "+throwable);
+                        }
+                        )
+                .log();
+    }
 
     public static void main(String[] args) {
         FluxAndMonoServices fluxAndMonoServices= new FluxAndMonoServices();
@@ -168,7 +257,7 @@ public class FluxAndMonoServices {
 //             System.out.println("Flatmap -> "+s);
 //         });
 
-        fluxAndMonoServices.fluxZip().subscribe(s -> {
+        fluxAndMonoServices.fluxZipTuple().subscribe(s -> {
             System.out.println("Mono Flatmap -> "+s);
         });
     }

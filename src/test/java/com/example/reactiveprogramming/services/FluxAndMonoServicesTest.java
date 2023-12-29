@@ -191,4 +191,72 @@ class FluxAndMonoServicesTest {
                 .verifyComplete();
 
     }
+
+    @Test
+    void fluxZipWith() {
+        Flux<String> stringFlux = fluxAndMonoServices.fluxZipWith();
+        StepVerifier.create(stringFlux)
+                .expectNext("AppleLemon","Pine Applecucumber")
+                .verifyComplete();
+    }
+
+    @Test
+    void fluxZipTuple(){
+        Flux<String> stringFlux = fluxAndMonoServices.fluxZipTuple();
+        StepVerifier.create(stringFlux)
+                .expectNext("AppleLemonPotato","Pine ApplecucumberTomato")
+                .verifyComplete();
+    }
+
+    @Test
+    void monoZipWith() {
+        Mono<String> stringFlux = fluxAndMonoServices.monoZipWith();
+        StepVerifier.create(stringFlux)
+                .expectNext("AppleLemon")
+                .verifyComplete();
+    }
+
+    @Test
+    void firstFluxFilterDoOn() {
+        Flux<String> stringFlux = fluxAndMonoServices.firstFluxFilterDoOn(2);
+        StepVerifier.create(stringFlux)
+                .expectNext("Apple","Banana")
+                .verifyComplete();
+
+
+    }
+
+    @Test
+    void fruitsFluxOnErrorReturn() {
+        Flux<String> stringFlux = fluxAndMonoServices.fruitsFluxOnErrorReturn();
+        StepVerifier.create(stringFlux)
+                .expectNext("Apple","Mango","Orange")
+                .verifyComplete();
+    }
+
+    @Test
+    void fruitsFluxOnErrorContinue() {
+        Flux<String> stringFlux = fluxAndMonoServices.fruitsFluxOnErrorContinue();
+        StepVerifier.create(stringFlux)
+                .expectNext("APPLE","ORANGE")
+                .verifyComplete();
+    }
+
+    @Test
+    void fruitsFluxOnErrorMap() {
+        Flux<String> stringFlux = fluxAndMonoServices.fruitsFluxOnErrorMap();
+        StepVerifier.create(stringFlux)
+                .expectNext("APPLE")
+                .expectError(IllegalStateException.class)
+                .verify();
+    }
+
+    @Test
+    void fruitsFluxDoOnError() {
+        Flux<String> stringFlux = fluxAndMonoServices.fruitsFluxDoOnError();
+        StepVerifier.create(stringFlux)
+                .expectNext("APPLE")
+                .expectError(RuntimeException.class)
+                .verify();
+    }
 }
